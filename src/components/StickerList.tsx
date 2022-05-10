@@ -6,7 +6,7 @@ import { Paper } from "@mui/material";
 import Typography from "@mui/material/Typography";
 
 import KOHARU_18 from "../asset/koharu_18.webp";
-import KOHARU_NO_HENTAI from "../asset/koharu_no_hentai.jpg";
+import KOHARU_NO_HENTAI from "../asset/koharu_hentai_dame.jpg";
 
 interface Sticker {
   name: string;

@@ -3,8 +3,8 @@ import { Paper } from "@mui/material";
 import { ImageType } from "../App";
 
 export enum DEFAULT_LAYER_SIZE {
-  WIDTH = 500,
-  HEIGHT = 500,
+  WIDTH = window.innerWidth,
+  HEIGHT = window.innerHeight * 0.6,
 }
 
 interface ImageCanvasProps {
@@ -17,7 +17,7 @@ export default function ImageCanvas({ image }: ImageCanvasProps) {
   const drawRawImageLayer = () => {
     if (image === undefined) return;
 
-    console.log(image);
+    console.log(DEFAULT_LAYER_SIZE.WIDTH, DEFAULT_LAYER_SIZE.HEIGHT);
 
     const canvas = rawImageLayer.current;
     if (!canvas) return;
@@ -47,7 +47,10 @@ export default function ImageCanvas({ image }: ImageCanvasProps) {
   useEffect(drawRawImageLayer, [image]);
 
   return (
-    <Paper elevation={10}>
+    <Paper
+      elevation={10}
+      sx={{ width: window.innerWidth, height: window.innerHeight * 0.6 }}
+    >
       <canvas
         ref={rawImageLayer}
         // className="cropArea__rawImageLayer"
@@ -78,6 +81,7 @@ DrawResizedImageParams): void => {
     image.height <= DEFAULT_LAYER_SIZE.HEIGHT
   ) {
     //   setLayerSize({ width: image.width, height: image.height });
+    console.log("asdf");
     canvasCtx.drawImage(image, 0, 0, image.width, image.height);
     return;
   }
@@ -89,12 +93,13 @@ DrawResizedImageParams): void => {
     //     width: DEFAULT_LAYER_SIZE.WIDTH,
     //     height: DEFAULT_LAYER_SIZE.HEIGHT * ratio,
     //   });
+    console.log("asdf1");
     canvasCtx.drawImage(
       image,
       0,
       0,
       DEFAULT_LAYER_SIZE.WIDTH,
-      DEFAULT_LAYER_SIZE.HEIGHT * ratio
+      DEFAULT_LAYER_SIZE.HEIGHT
     );
     return;
   }
@@ -104,11 +109,13 @@ DrawResizedImageParams): void => {
     //     width: DEFAULT_LAYER_SIZE.WIDTH / ratio,
     //     height: DEFAULT_LAYER_SIZE.HEIGHT,
     //   });
+    console.log("asdf2", DEFAULT_LAYER_SIZE.WIDTH, DEFAULT_LAYER_SIZE.HEIGHT);
+
     canvasCtx.drawImage(
       image,
       0,
       0,
-      DEFAULT_LAYER_SIZE.WIDTH / ratio,
+      DEFAULT_LAYER_SIZE.WIDTH,
       DEFAULT_LAYER_SIZE.HEIGHT
     );
     return;

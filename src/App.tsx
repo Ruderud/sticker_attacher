@@ -1,6 +1,7 @@
 import { Box, Paper } from "@mui/material";
 import { styled } from "@mui/system";
 import { useState } from "react";
+import ExportImage from "./components/ExportImage";
 import ImageCanvas from "./components/ImageCanvas";
 import StickerList from "./components/StickerList";
 import TopBar from "./components/TopBar";
@@ -23,6 +24,7 @@ export default function App() {
       <TopBar setImage={setImage} />
       <StickerList />
       <ImageCanvas image={image} />
+      <ExportImage />
     </AppComponent>
   );
 }
