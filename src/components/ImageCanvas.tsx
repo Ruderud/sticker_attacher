@@ -13,6 +13,13 @@ export enum DEFAULT_LAYER_SIZE {
 
 const CONTROL_TAB_HEIGHT = 50;
 
+const INITAL_CONTROLED_STICKER = {
+  x: 0,
+  y: 0,
+  width: 100,
+  height: 100,
+};
+
 interface ImageCanvasProps {
   image?: ImageType;
   selectedSticker?: Sticker;
@@ -22,6 +29,7 @@ interface ImageCanvasProps {
 export default function ImageCanvas({
   image,
   selectedSticker,
+  setSelectedSticker,
 }: ImageCanvasProps) {
   const rawImageLayer = useRef<HTMLCanvasElement>(null);
   const stickerLayer = useRef<HTMLCanvasElement>(null);
@@ -29,10 +37,8 @@ export default function ImageCanvas({
     width: DEFAULT_LAYER_SIZE.WIDTH,
     height: DEFAULT_LAYER_SIZE.HEIGHT,
   });
-  const [stickerSize, setStickerSize] = useState({
-    width: 100,
-    height: 100,
-  });
+  const [sticker, setSticker] = useState(INITAL_CONTROLED_STICKER);
+  const [isMove, setIsMove] = useState<boolean>(false);
 
   const drawRawImageLayer = () => {
     if (image === undefined) return;
@@ -63,33 +69,51 @@ export default function ImageCanvas({
     clientY?: number,
     sizeOpt?: "increase" | "decrease"
   ) => {
-    if (selectedSticker === undefined) return;
-
     const canvas = stickerLayer.current;
     if (!canvas) return;
+
+    if (selectedSticker === undefined) {
+      setSticker(INITAL_CONTROLED_STICKER);
+      canvas.width = canvas.width;
+      return;
+    }
+
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
     const canvasCtx = canvas.getContext("2d");
     if (!canvasCtx) return;
 
-    const targetX = clientX || 0;
-    const targetY = clientY || 0;
+    const canvasPosition =
+      canvas.getBoundingClientRect() ??
+      new DOMRect(sticker.x, sticker.y, sticker.width, sticker.height);
+
+    if (clientX && clientY) {
+      setSticker({
+        ...sticker,
+        x: clientX - canvasPosition.x,
+        y: clientY - canvasPosition.y,
+      });
+    }
 
     canvasCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-    canvasCtx.clearRect(targetX, targetY, 100, 100);
+    canvasCtx.clearRect(sticker.x, sticker.y, sticker.width, sticker.height);
 
-    const rawSticker = new Image();
-    rawSticker.src = selectedSticker.url;
-    rawSticker.onload = () => {
+    const rawStickerImg = new Image();
+    rawStickerImg.src = selectedSticker.url;
+    rawStickerImg.onload = () => {
       //   const resizeHeight = rawSticker.height * (canvasSize.width / rawSticker.width);
 
-      canvasCtx.drawImage(rawSticker, targetX, targetY, 100, 100);
+      canvasCtx.drawImage(
+        rawStickerImg,
+        sticker.x,
+        sticker.y,
+        sticker.width,
+        sticker.height
+      );
     };
   };
-
-  const [isMove, setIsMove] = useState<boolean>(false);
 
   const handleStickerDown = () => {
     setIsMove(true);
@@ -112,8 +136,10 @@ export default function ImageCanvas({
     setIsMove(false);
   };
 
+  const fixSticker = () => {};
+
   useEffect(drawRawImageLayer, [image]);
-  useEffect(drawStickerLayer, [selectedSticker]);
+  useEffect(drawStickerLayer, [selectedSticker, sticker.width, sticker.height]);
 
   return (
     <Paper
@@ -129,6 +155,13 @@ export default function ImageCanvas({
           aria-label="upload picture"
           component="span"
           size="large"
+          onClick={() => {
+            setSticker({
+              ...sticker,
+              width: sticker.width + 10,
+              height: sticker.height + 10,
+            });
+          }}
         >
           <AddCircleIcon />
         </IconButton>
@@ -137,13 +170,27 @@ export default function ImageCanvas({
           aria-label="upload picture"
           component="span"
           size="large"
+          onClick={() => {
+            if (sticker.width <= 10) return;
+            setSticker({
+              ...sticker,
+              width: sticker.width - 10,
+              height: sticker.height - 10,
+            });
+          }}
         >
           <RemoveCircleIcon />
         </IconButton>
         <Button variant="contained" color="primary">
           붙이기
         </Button>
-        <Button variant="contained" color="error">
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => {
+            setSelectedSticker(undefined);
+          }}
+        >
           취소
         </Button>
       </ControlTabComponent>
