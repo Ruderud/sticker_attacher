@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, IconButton, Paper } from "@mui/material";
-import { ImageType } from "../App";
+import { ImageType, StickerLog } from "../App";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import { styled } from "@mui/system";
@@ -13,7 +13,14 @@ export enum DEFAULT_LAYER_SIZE {
 
 const CONTROL_TAB_HEIGHT = 50;
 
-const INITAL_CONTROLED_STICKER = {
+export interface StickerState {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const INITAL_CONTROLED_STICKER: StickerState = {
   x: 0,
   y: 0,
   width: 100,
@@ -24,12 +31,16 @@ interface ImageCanvasProps {
   image?: ImageType;
   selectedSticker?: Sticker;
   setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
+  stickerLog: StickerLog[];
+  setStickerLog: React.Dispatch<React.SetStateAction<StickerLog[]>>;
 }
 
 export default function ImageCanvas({
   image,
   selectedSticker,
   setSelectedSticker,
+  stickerLog,
+  setStickerLog,
 }: ImageCanvasProps) {
   const rawImageLayer = useRef<HTMLCanvasElement>(null);
   const stickerLayer = useRef<HTMLCanvasElement>(null);
@@ -64,14 +75,11 @@ export default function ImageCanvas({
     };
   };
 
-  const drawStickerLayer = (
-    clientX?: number,
-    clientY?: number,
-    sizeOpt?: "increase" | "decrease"
-  ) => {
+  const drawStickerLayer = (clientX?: number, clientY?: number) => {
     const canvas = stickerLayer.current;
     if (!canvas) return;
 
+    //스티커 취소시 스티커 레이어 초기화
     if (selectedSticker === undefined) {
       setSticker(INITAL_CONTROLED_STICKER);
       canvas.width = canvas.width;
@@ -136,10 +144,75 @@ export default function ImageCanvas({
     setIsMove(false);
   };
 
-  const fixSticker = () => {};
+  const fixSticker = () => {
+    if (!selectedSticker) return;
+    const rawImageCanvas = rawImageLayer.current;
+    if (!rawImageCanvas) return;
+    const rawImageCanvasCtx = rawImageCanvas.getContext("2d");
+    if (!rawImageCanvasCtx) return;
+    const stickerCanvas = stickerLayer.current;
+    if (!stickerCanvas) return;
+    const stickerCanvasCtx = stickerCanvas.getContext("2d");
+    if (!stickerCanvasCtx) return;
+
+    const rawStickerImg = new Image();
+    rawStickerImg.src = selectedSticker.url;
+    rawStickerImg.onload = () => {
+      rawImageCanvasCtx.drawImage(
+        rawStickerImg,
+        sticker.x,
+        sticker.y,
+        sticker.width,
+        sticker.height
+      );
+    };
+
+    //선택스티커 & 스티커 캔버스 초기화
+    setSticker(INITAL_CONTROLED_STICKER);
+    stickerCanvas.width = stickerCanvas.width;
+    setSelectedSticker(undefined);
+
+    //캔버스로그 갱신
+    setStickerLog([
+      ...stickerLog,
+      {
+        stickerName: selectedSticker.name,
+        stickerURL: selectedSticker.url,
+        ...sticker,
+      },
+    ]);
+    setStickerLogPointer(stickerLog.length - 1);
+  };
+
+  const [stickerLogPointer, setStickerLogPointer] = useState<number>(0);
 
   useEffect(drawRawImageLayer, [image]);
   useEffect(drawStickerLayer, [selectedSticker, sticker.width, sticker.height]);
+  useEffect(() => {
+    if (stickerLogPointer < 0) return;
+    const targetStickerLog = stickerLog.filter(
+      (log, idx) => idx <= stickerLogPointer
+    );
+
+    console.log(stickerLogPointer, targetStickerLog);
+
+    const canvas = rawImageLayer.current;
+    if (!canvas) return;
+    const canvasCtx = canvas.getContext("2d");
+    if (!canvasCtx) return;
+    canvas.width = canvas.width;
+
+    //원본배경다시그림
+    drawRawImageLayer();
+
+    targetStickerLog.map((ele) => {
+      const stickerImg = new Image();
+      stickerImg.src = ele.stickerURL;
+      stickerImg.onload = () => {
+        canvasCtx.drawImage(stickerImg, ele.x, ele.y, ele.width, ele.height);
+      };
+    });
+  }, [stickerLogPointer]);
 
   return (
     <Paper
@@ -181,7 +254,7 @@ export default function ImageCanvas({
         >
           <RemoveCircleIcon />
         </IconButton>
-        <Button variant="contained" color="primary">
+        <Button variant="contained" color="primary" onClick={fixSticker}>
           붙이기
         </Button>
         <Button
@@ -192,6 +265,28 @@ export default function ImageCanvas({
           }}
         >
           취소
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={stickerLogPointer === -1 ? true : false}
+          onClick={() => {
+            if (stickerLogPointer === -1) return;
+            setStickerLogPointer(stickerLogPointer - 1);
+          }}
+        >
+          undo
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={stickerLogPointer >= stickerLog.length - 1 ? true : false}
+          onClick={() => {
+            if (stickerLogPointer === stickerLog.length - 1) return;
+            setStickerLogPointer(stickerLogPointer + 1);
+          }}
+        >
+          redo
         </Button>
       </ControlTabComponent>
       <CanvasContainerCompoent
@@ -213,7 +308,7 @@ export default function ImageCanvas({
 }
 
 const ControlTabComponent = styled("div")({
-  //   borderBottom: "1px solid black",
+  borderBottom: "1px solid black",
   height: CONTROL_TAB_HEIGHT,
   display: "flex",
   alignItems: "center",

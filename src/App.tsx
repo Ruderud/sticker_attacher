@@ -2,7 +2,7 @@ import { Box, Paper } from "@mui/material";
 import { styled } from "@mui/system";
 import { useState } from "react";
 import ExportImage from "./components/ExportImage";
-import ImageCanvas from "./components/ImageCanvas";
+import ImageCanvas, { StickerState } from "./components/ImageCanvas";
 import StickerList, { Sticker } from "./components/StickerList";
 import TopBar from "./components/TopBar";
 
@@ -11,9 +11,15 @@ export type ImageType = {
   url: string;
 };
 
+export interface StickerLog extends StickerState {
+  stickerName: string;
+  stickerURL: string;
+}
+
 export default function App() {
   const [image, setImage] = useState<ImageType | undefined>();
   const [selectedSticker, setSelectedSticker] = useState<Sticker>();
+  const [stickerLog, setStickerLog] = useState<StickerLog[]>([]);
 
   return (
     <AppComponent>
@@ -24,9 +30,11 @@ export default function App() {
         setSelectedSticker={setSelectedSticker}
       />
       <ImageCanvas
+        image={image}
         selectedSticker={selectedSticker}
         setSelectedSticker={setSelectedSticker}
-        image={image}
+        stickerLog={stickerLog}
+        setStickerLog={setStickerLog}
       />
       <ExportImage />
     </AppComponent>
