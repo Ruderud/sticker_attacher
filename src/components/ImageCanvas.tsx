@@ -1,131 +1,192 @@
-import { useEffect, useRef } from "react";
-import { Paper } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { Button, IconButton, Paper } from "@mui/material";
 import { ImageType } from "../App";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import { styled } from "@mui/system";
+import { Sticker } from "./StickerList";
 
 export enum DEFAULT_LAYER_SIZE {
   WIDTH = window.innerWidth,
-  HEIGHT = window.innerHeight * 0.6,
+  HEIGHT = window.innerHeight * 0.5,
 }
+
+const CONTROL_TAB_HEIGHT = 50;
 
 interface ImageCanvasProps {
   image?: ImageType;
+  selectedSticker?: Sticker;
+  setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
 }
 
-export default function ImageCanvas({ image }: ImageCanvasProps) {
+export default function ImageCanvas({
+  image,
+  selectedSticker,
+}: ImageCanvasProps) {
   const rawImageLayer = useRef<HTMLCanvasElement>(null);
+  const stickerLayer = useRef<HTMLCanvasElement>(null);
+  const [canvasSize, setCanvasSize] = useState({
+    width: DEFAULT_LAYER_SIZE.WIDTH,
+    height: DEFAULT_LAYER_SIZE.HEIGHT,
+  });
+  const [stickerSize, setStickerSize] = useState({
+    width: 100,
+    height: 100,
+  });
 
   const drawRawImageLayer = () => {
     if (image === undefined) return;
-
-    console.log(DEFAULT_LAYER_SIZE.WIDTH, DEFAULT_LAYER_SIZE.HEIGHT);
 
     const canvas = rawImageLayer.current;
     if (!canvas) return;
     const canvasCtx = canvas.getContext("2d");
     if (!canvasCtx) return;
+    canvas.width = canvas.width; //초기화
 
-    canvasCtx.clearRect(
-      0,
-      0,
-      DEFAULT_LAYER_SIZE.WIDTH,
-      DEFAULT_LAYER_SIZE.HEIGHT
-    );
-
-    const img = new Image();
-    img.src = image?.url;
-    img.onload = () => {
-      drawResizedImageLayer({
-        image: img,
-        //   imageSizeRatio,
-        canvasCtx,
-        //   setLayerSize,
+    const rawImg = new Image();
+    rawImg.src = image?.url;
+    rawImg.onload = () => {
+      const resizeHeight = rawImg.height * (canvasSize.width / rawImg.width);
+      setCanvasSize({
+        ...canvasSize,
+        height: resizeHeight,
       });
-      //   setMaginificationRate(layerSize.width / img.width);
+
+      canvas.width = canvasSize.width;
+      canvas.height = resizeHeight;
+      canvasCtx.drawImage(rawImg, 0, 0, DEFAULT_LAYER_SIZE.WIDTH, resizeHeight);
     };
   };
 
+  const drawStickerLayer = (
+    clientX?: number,
+    clientY?: number,
+    sizeOpt?: "increase" | "decrease"
+  ) => {
+    if (selectedSticker === undefined) return;
+
+    const canvas = stickerLayer.current;
+    if (!canvas) return;
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
+    const canvasCtx = canvas.getContext("2d");
+    if (!canvasCtx) return;
+
+    const targetX = clientX || 0;
+    const targetY = clientY || 0;
+
+    canvasCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    canvasCtx.clearRect(targetX, targetY, 100, 100);
+
+    const rawSticker = new Image();
+    rawSticker.src = selectedSticker.url;
+    rawSticker.onload = () => {
+      //   const resizeHeight = rawSticker.height * (canvasSize.width / rawSticker.width);
+
+      canvasCtx.drawImage(rawSticker, targetX, targetY, 100, 100);
+    };
+  };
+
+  const [isMove, setIsMove] = useState<boolean>(false);
+
+  const handleStickerDown = () => {
+    setIsMove(true);
+  };
+
+  const handleStickerMouseMove = (
+    evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+  ) => {
+    if (!isMove) return;
+
+    drawStickerLayer(evt.clientX, evt.clientY);
+  };
+  const handleStickerTouchMove = (evt: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isMove) return;
+
+    drawStickerLayer(evt.touches[0].clientX, evt.touches[0].clientY);
+  };
+
+  const handleStickerUp = () => {
+    setIsMove(false);
+  };
+
   useEffect(drawRawImageLayer, [image]);
+  useEffect(drawStickerLayer, [selectedSticker]);
 
   return (
     <Paper
       elevation={10}
-      sx={{ width: window.innerWidth, height: window.innerHeight * 0.6 }}
+      sx={{
+        width: canvasSize.width,
+        height: canvasSize.height + CONTROL_TAB_HEIGHT,
+      }} //컨트롤러 50px
     >
-      <canvas
-        ref={rawImageLayer}
-        // className="cropArea__rawImageLayer"
-        // width={layerSize.width}
-        // height={layerSize.height}
-        width={DEFAULT_LAYER_SIZE.WIDTH}
-        height={DEFAULT_LAYER_SIZE.HEIGHT}
-      />
+      <ControlTabComponent>
+        <IconButton
+          color="primary"
+          aria-label="upload picture"
+          component="span"
+          size="large"
+        >
+          <AddCircleIcon />
+        </IconButton>
+        <IconButton
+          color="primary"
+          aria-label="upload picture"
+          component="span"
+          size="large"
+        >
+          <RemoveCircleIcon />
+        </IconButton>
+        <Button variant="contained" color="primary">
+          붙이기
+        </Button>
+        <Button variant="contained" color="error">
+          취소
+        </Button>
+      </ControlTabComponent>
+      <CanvasContainerCompoent
+        style={{ height: canvasSize.height, overflow: "hidden" }}
+      >
+        <RawImageLayerCompoent ref={rawImageLayer} />
+        <StickerLayerCompoent
+          ref={stickerLayer}
+          onMouseDown={handleStickerDown}
+          onMouseMove={handleStickerMouseMove}
+          onMouseUp={handleStickerUp}
+          onTouchStart={handleStickerDown}
+          onTouchMove={handleStickerTouchMove}
+          onTouchEnd={handleStickerUp}
+        />
+      </CanvasContainerCompoent>
     </Paper>
   );
 }
 
-interface DrawResizedImageParams {
-  image: HTMLImageElement;
-  // imageSizeRatio: number;
-  canvasCtx: CanvasRenderingContext2D;
-  // setLayerSize: React.Dispatch<React.SetStateAction<Layer>>;
-}
+const ControlTabComponent = styled("div")({
+  //   borderBottom: "1px solid black",
+  height: CONTROL_TAB_HEIGHT,
+  display: "flex",
+  alignItems: "center",
+});
 
-const drawResizedImageLayer = ({
-  image,
-  // imageSizeRatio,
-  canvasCtx,
-}: // setLayerSize,
-DrawResizedImageParams): void => {
-  if (
-    image.width <= DEFAULT_LAYER_SIZE.WIDTH &&
-    image.height <= DEFAULT_LAYER_SIZE.HEIGHT
-  ) {
-    //   setLayerSize({ width: image.width, height: image.height });
-    console.log("asdf");
-    canvasCtx.drawImage(image, 0, 0, image.width, image.height);
-    return;
-  }
+const CanvasContainerCompoent = styled("div")({
+  position: "relative",
+  touchAction: "none",
+});
 
-  const ratio = image.height / image.width;
+const RawImageLayerCompoent = styled("canvas")({
+  display: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(0%, 0%)",
+});
 
-  if (image.width > image.height) {
-    //   setLayerSize({
-    //     width: DEFAULT_LAYER_SIZE.WIDTH,
-    //     height: DEFAULT_LAYER_SIZE.HEIGHT * ratio,
-    //   });
-    console.log("asdf1");
-    canvasCtx.drawImage(
-      image,
-      0,
-      0,
-      DEFAULT_LAYER_SIZE.WIDTH,
-      DEFAULT_LAYER_SIZE.HEIGHT
-    );
-    return;
-  }
-
-  if (image.width <= image.height) {
-    //   setLayerSize({
-    //     width: DEFAULT_LAYER_SIZE.WIDTH / ratio,
-    //     height: DEFAULT_LAYER_SIZE.HEIGHT,
-    //   });
-    console.log("asdf2", DEFAULT_LAYER_SIZE.WIDTH, DEFAULT_LAYER_SIZE.HEIGHT);
-
-    canvasCtx.drawImage(
-      image,
-      0,
-      0,
-      DEFAULT_LAYER_SIZE.WIDTH,
-      DEFAULT_LAYER_SIZE.HEIGHT
-    );
-    return;
-  }
-
-  canvasCtx.drawImage(
-    image,
-    0,
-    0,
-    DEFAULT_LAYER_SIZE.WIDTH,
-    DEFAULT_LAYER_SIZE.HEIGHT
-  );
-};
+const StickerLayerCompoent = styled("canvas")({
+  display: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(0%, -100.5%)",
+});

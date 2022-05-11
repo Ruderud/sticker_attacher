@@ -4,11 +4,12 @@ import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
 import { Paper } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { ImageType } from "../App";
 
 import KOHARU_18 from "../asset/koharu_18.webp";
 import KOHARU_NO_HENTAI from "../asset/koharu_hentai_dame.jpg";
 
-interface Sticker {
+export interface Sticker {
   name: string;
   url: string;
 }
@@ -40,29 +41,60 @@ const DEFAULT_STICKERS: Array<Sticker> = [
   },
 ];
 
-export default function StickerList() {
+interface StickerListProps {
+  image?: ImageType;
+  selectedSticker?: Sticker;
+  setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
+}
+
+export default function StickerList({
+  image,
+  selectedSticker,
+  setSelectedSticker,
+}: StickerListProps) {
+  const selectSticker = (sticker: Sticker) => {
+    if (!image) {
+      alert("이미지를 먼저 가져와주세요");
+      return;
+    }
+
+    setSelectedSticker(sticker);
+  };
+
   return (
-    <Paper elevation={10}>
-      <Typography variant="h5">사용할 스티커 선택</Typography>
+    <Paper
+      elevation={10}
+      sx={{
+        mt: 2,
+      }}
+    >
+      <Typography variant="h5" sx={{ pl: 2, fontWeight: "bold" }}>
+        사용할 스티커 선택
+      </Typography>
       <ImageList
         sx={{
           width: "100%",
           height: 150,
           display: "flex",
           flexDirection: "row",
-          background: "gray",
+
           marginTop: 0,
         }}
       >
-        {DEFAULT_STICKERS.map((item) => (
-          <ImageListItem key={item.name}>
+        {DEFAULT_STICKERS.map((sticker, idx) => (
+          <ImageListItem
+            key={sticker.name + idx}
+            onClick={() => {
+              selectSticker(sticker);
+            }}
+          >
             <img
-              src={`${item.url}`}
+              src={`${sticker.url}`}
               style={{ width: 180, overflow: "hidden" }}
-              alt={item.name}
+              alt={sticker.name}
               loading="lazy"
             />
-            <ImageListItemBar title={item.name} position="below" />
+            <ImageListItemBar title={sticker.name} position="bottom" />
           </ImageListItem>
         ))}
       </ImageList>
