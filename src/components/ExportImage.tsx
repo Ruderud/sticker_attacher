@@ -6,6 +6,10 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
+import SaveAltIcon from "@mui/icons-material/SaveAlt";
+import UndoIcon from "@mui/icons-material/Undo";
+import RedoIcon from "@mui/icons-material/Redo";
+
 export default function ExportImage() {
   const [value, setValue] = React.useState("recents");
 
@@ -19,26 +23,13 @@ export default function ExportImage() {
       value={value}
       onChange={handleChange}
     >
+      <BottomNavigationAction label="Undo" value="undo" icon={<UndoIcon />} />
       <BottomNavigationAction
-        label="Recents"
-        value="recents"
-        icon={<RestoreIcon />}
+        label="Save"
+        value="save"
+        icon={<SaveAltIcon />}
       />
-      <BottomNavigationAction
-        label="Favorites"
-        value="favorites"
-        icon={<FavoriteIcon />}
-      />
-      <BottomNavigationAction
-        label="Nearby"
-        value="nearby"
-        icon={<LocationOnIcon />}
-      />
-      <BottomNavigationAction
-        label="Folder"
-        value="folder"
-        icon={<FolderIcon />}
-      />
+      <BottomNavigationAction label="Redo" value="redo" icon={<RedoIcon />} />
     </BottomNavigation>
   );
 }

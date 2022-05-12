@@ -11,15 +11,23 @@ export type ImageType = {
   url: string;
 };
 
-export interface StickerLog extends StickerState {
+export interface StickerTimeLine extends StickerState {
   stickerName: string;
   stickerURL: string;
+}
+
+export interface StickerLog {
+  logArray: StickerTimeLine[];
+  pointer: number;
 }
 
 export default function App() {
   const [image, setImage] = useState<ImageType | undefined>();
   const [selectedSticker, setSelectedSticker] = useState<Sticker>();
-  const [stickerLog, setStickerLog] = useState<StickerLog[]>([]);
+  const [stickerLog, setStickerLog] = useState<StickerLog>({
+    logArray: [],
+    pointer: 0,
+  });
 
   return (
     <AppComponent>

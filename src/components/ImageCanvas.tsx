@@ -31,8 +31,8 @@ interface ImageCanvasProps {
   image?: ImageType;
   selectedSticker?: Sticker;
   setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
-  stickerLog: StickerLog[];
-  setStickerLog: React.Dispatch<React.SetStateAction<StickerLog[]>>;
+  stickerLog: StickerLog;
+  setStickerLog: React.Dispatch<React.SetStateAction<StickerLog>>;
 }
 
 export default function ImageCanvas({
@@ -173,28 +173,30 @@ export default function ImageCanvas({
     setSelectedSticker(undefined);
 
     //캔버스로그 갱신
-    setStickerLog([
-      ...stickerLog,
+    const newStickerLogArray = [
+      ...stickerLog.logArray,
       {
         stickerName: selectedSticker.name,
         stickerURL: selectedSticker.url,
-        ...sticker,
+        x: sticker.x,
+        y: sticker.y,
+        width: sticker.width,
+        height: sticker.height,
       },
-    ]);
-    setStickerLogPointer(stickerLog.length - 1);
+    ];
+    setStickerLog({
+      logArray: newStickerLogArray,
+      pointer: newStickerLogArray.length,
+    });
   };
-
-  const [stickerLogPointer, setStickerLogPointer] = useState<number>(0);
 
   useEffect(drawRawImageLayer, [image]);
   useEffect(drawStickerLayer, [selectedSticker, sticker.width, sticker.height]);
   useEffect(() => {
-    if (stickerLogPointer < 0) return;
-    const targetStickerLog = stickerLog.filter(
-      (log, idx) => idx <= stickerLogPointer
+    // if (stickerLog.pointer === 0) return;
+    const targetStickerLogArray = stickerLog.logArray.filter(
+      (log, idx) => idx < stickerLog.pointer
     );
-
-    console.log(stickerLogPointer, targetStickerLog);
 
     const canvas = rawImageLayer.current;
     if (!canvas) return;
@@ -205,14 +207,16 @@ export default function ImageCanvas({
     //원본배경다시그림
     drawRawImageLayer();
 
-    targetStickerLog.map((ele) => {
+    console.log(targetStickerLogArray);
+
+    targetStickerLogArray.map((ele) => {
       const stickerImg = new Image();
       stickerImg.src = ele.stickerURL;
       stickerImg.onload = () => {
         canvasCtx.drawImage(stickerImg, ele.x, ele.y, ele.width, ele.height);
       };
     });
-  }, [stickerLogPointer]);
+  }, [stickerLog.pointer]);
 
   return (
     <Paper
@@ -269,10 +273,12 @@ export default function ImageCanvas({
         <Button
           variant="contained"
           color="primary"
-          disabled={stickerLogPointer === -1 ? true : false}
+          disabled={stickerLog.pointer <= 0 ? true : false}
           onClick={() => {
-            if (stickerLogPointer === -1) return;
-            setStickerLogPointer(stickerLogPointer - 1);
+            setStickerLog({
+              ...stickerLog,
+              pointer: stickerLog.pointer - 1,
+            });
           }}
         >
           undo
@@ -280,10 +286,14 @@ export default function ImageCanvas({
         <Button
           variant="contained"
           color="primary"
-          disabled={stickerLogPointer >= stickerLog.length - 1 ? true : false}
+          disabled={
+            stickerLog.pointer >= stickerLog.logArray.length ? true : false
+          }
           onClick={() => {
-            if (stickerLogPointer === stickerLog.length - 1) return;
-            setStickerLogPointer(stickerLogPointer + 1);
+            setStickerLog({
+              ...stickerLog,
+              pointer: stickerLog.pointer + 1,
+            });
           }}
         >
           redo
