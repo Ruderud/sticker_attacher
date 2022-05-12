@@ -52,5 +52,6 @@ export default function App() {
 const AppComponent = styled("div")({
   // display: "grid",
   // gridTemplateRows: "10vw 20vw 40vw 10vw",
+  // position: "relative",
   background: "#ffffff",
 });

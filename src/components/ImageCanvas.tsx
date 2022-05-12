@@ -192,31 +192,29 @@ export default function ImageCanvas({
 
   useEffect(drawRawImageLayer, [image]);
   useEffect(drawStickerLayer, [selectedSticker, sticker.width, sticker.height]);
-  useEffect(() => {
-    // if (stickerLog.pointer === 0) return;
-    const targetStickerLogArray = stickerLog.logArray.filter(
-      (log, idx) => idx < stickerLog.pointer
-    );
-
-    const canvas = rawImageLayer.current;
-    if (!canvas) return;
-    const canvasCtx = canvas.getContext("2d");
-    if (!canvasCtx) return;
-    canvas.width = canvas.width;
-
-    //원본배경다시그림
-    drawRawImageLayer();
-
-    console.log(targetStickerLogArray);
-
-    targetStickerLogArray.map((ele) => {
-      const stickerImg = new Image();
-      stickerImg.src = ele.stickerURL;
-      stickerImg.onload = () => {
-        canvasCtx.drawImage(stickerImg, ele.x, ele.y, ele.width, ele.height);
-      };
-    });
-  }, [stickerLog.pointer]);
+  // useEffect(() => {
+  // undo redo가 아닌, 단순 스티커 붙이기일땐 안해야함
+  // 버그 수정하지않으면 스티커 붙였을떄 안보이는 버그있음
+  // if (stickerLog.pointer === 0) return;
+  // const targetStickerLogArray = stickerLog.logArray.filter(
+  //   (log, idx) => idx < stickerLog.pointer
+  // );
+  // const canvas = rawImageLayer.current;
+  // if (!canvas) return;
+  // const canvasCtx = canvas.getContext("2d");
+  // if (!canvasCtx) return;
+  // canvas.width = canvas.width;
+  // //원본배경다시그림
+  // drawRawImageLayer();
+  // console.log(targetStickerLogArray);
+  // targetStickerLogArray.map((ele) => {
+  //   const stickerImg = new Image();
+  //   stickerImg.src = ele.stickerURL;
+  //   stickerImg.onload = () => {
+  //     canvasCtx.drawImage(stickerImg, ele.x, ele.y, ele.width, ele.height);
+  //   };
+  // });
+  // }, [stickerLog]);
 
   return (
     <Paper
@@ -270,7 +268,7 @@ export default function ImageCanvas({
         >
           취소
         </Button>
-        <Button
+        {/* <Button
           variant="contained"
           color="primary"
           disabled={stickerLog.pointer <= 0 ? true : false}
@@ -297,7 +295,7 @@ export default function ImageCanvas({
           }}
         >
           redo
-        </Button>
+        </Button> */}
       </ControlTabComponent>
       <CanvasContainerCompoent
         style={{ height: canvasSize.height, overflow: "hidden" }}
