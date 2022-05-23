@@ -1,13 +1,14 @@
-import * as React from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
 import { Paper } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { ImageType } from "../App";
+import AddIcon from "@mui/icons-material/Add";
 
 import KOHARU_18 from "../asset/koharu_18.webp";
 import KOHARU_NO_HENTAI from "../asset/koharu_hentai_dame.jpg";
+import { useEffect, useRef, useState } from "react";
 
 export interface Sticker {
   name: string;
@@ -21,22 +22,6 @@ const DEFAULT_STICKERS: Array<Sticker> = [
   },
   {
     name: "코하루 야한건 안돼!",
-    url: KOHARU_NO_HENTAI,
-  },
-  {
-    name: "KOHARU_18",
-    url: KOHARU_18,
-  },
-  {
-    name: "KOHARU_NO_HENTAI",
-    url: KOHARU_NO_HENTAI,
-  },
-  {
-    name: "KOHARU_18",
-    url: KOHARU_18,
-  },
-  {
-    name: "KOHARU_NO_HENTAI",
     url: KOHARU_NO_HENTAI,
   },
 ];
@@ -61,6 +46,45 @@ export default function StickerList({
     setSelectedSticker(sticker);
   };
 
+  const [stickerList, setStickerList] = useState<Sticker[]>(DEFAULT_STICKERS);
+  const inputRef = useRef<HTMLInputElement>(document.createElement("input"));
+
+  useEffect(() => {
+    inputRef.current.accept = "image/*";
+    inputRef.current.type = "file";
+  }, []);
+
+  const handleImageUpload = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    if (!evt.target.files) return;
+
+    const inputImageFile = evt.target.files[0];
+
+    let fileReader = new FileReader();
+
+    try {
+      fileReader.readAsDataURL(inputImageFile);
+      fileReader.onerror = () => {
+        throw new Error("can't read file");
+      };
+      fileReader.onload = () => {
+        if (fileReader.result === null || fileReader.result === undefined) {
+          throw new Error("translate imageURL fail");
+        }
+        const imageURL = fileReader.result?.toString();
+        console.log({
+          file: inputImageFile,
+          url: imageURL,
+        });
+        setStickerList([
+          { name: inputImageFile.name, url: imageURL },
+          ...stickerList,
+        ]);
+      };
+    } catch (err) {
+      console.log(`Error message: ${err}`);
+    }
+  };
+
   return (
     <Paper
       elevation={10}
@@ -81,10 +105,36 @@ export default function StickerList({
           marginTop: 0,
         }}
       >
-        {DEFAULT_STICKERS.map((sticker, idx) => (
+        <ImageListItem
+          onClick={() => {
+            console.log("스티커 이미지 가져오기");
+            inputRef.current.click();
+          }}
+          sx={{
+            minWidth: 180,
+            background: "rgba(0,0,0,0.3)",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <input
+            ref={inputRef}
+            style={{ display: "none" }}
+            onChange={handleImageUpload}
+          />
+          <AddIcon
+            sx={{
+              fontSize: 50,
+              color: "rgb(255,255,255)",
+            }}
+          />
+          <ImageListItemBar title={"내 스티커 가져오기"} position="bottom" />
+        </ImageListItem>
+        {stickerList.map((sticker, idx) => (
           <ImageListItem
             key={sticker.name + idx}
-            onClick={() => {
+            onClick={(evt) => {
+              evt.preventDefault();
               selectSticker(sticker);
             }}
           >

@@ -1,10 +1,12 @@
-import { Box, Paper } from "@mui/material";
+import { Box, Fab, Paper } from "@mui/material";
 import { styled } from "@mui/system";
 import { useState } from "react";
 import ExportImage from "./components/ExportImage";
 import ImageCanvas, { StickerState } from "./components/ImageCanvas";
 import StickerList, { Sticker } from "./components/StickerList";
 import TopBar from "./components/TopBar";
+
+import SaveIcon from "@mui/icons-material/Save";
 
 export type ImageType = {
   file: File;
@@ -22,7 +24,7 @@ export interface StickerLog {
 }
 
 export default function App() {
-  const [image, setImage] = useState<ImageType | undefined>();
+  const [image, setImage] = useState<ImageType>();
   const [selectedSticker, setSelectedSticker] = useState<Sticker>();
   const [stickerLog, setStickerLog] = useState<StickerLog>({
     logArray: [],
@@ -44,7 +46,7 @@ export default function App() {
         stickerLog={stickerLog}
         setStickerLog={setStickerLog}
       />
-      <ExportImage />
+      <ExportImage image={image} stickerLog={stickerLog} />
     </AppComponent>
   );
 }

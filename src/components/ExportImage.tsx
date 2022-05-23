@@ -5,21 +5,20 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
-import SaveAltIcon from "@mui/icons-material/SaveAlt";
-import UndoIcon from "@mui/icons-material/Undo";
-import RedoIcon from "@mui/icons-material/Redo";
-import { SyntheticEvent, useRef, useState } from "react";
+import SaveIcon from "@mui/icons-material/Save";
+import { useRef, useState } from "react";
+import { Fab } from "@mui/material";
+import { ImageType, StickerLog } from "../App";
 
-export default function ExportImage() {
-  const [value, setValue] = useState("recents");
+interface ExportImageProps {
+  image?: ImageType;
+  stickerLog: StickerLog;
+}
 
-  const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setValue(newValue);
-  };
-
+export default function ExportImage({ image, stickerLog }: ExportImageProps) {
   const exportImageLayer = useRef<HTMLCanvasElement>(null);
-
   const exportImage = () => {
+    console.log(image, stickerLog);
     const canvas = exportImageLayer.current;
     if (!canvas) return;
     const canvasCtx = canvas.getContext("2d");
@@ -28,19 +27,17 @@ export default function ExportImage() {
   };
 
   return (
-    <BottomNavigation
-      sx={{ width: window.innerWidth, position: "fixed", bottom: 0 }}
-      value={value}
-      onChange={handleChange}
+    <Fab
+      color="primary"
+      aria-label="add"
+      sx={{
+        position: "fixed",
+        bottom: 20,
+        right: 20,
+      }}
+      onClick={exportImage}
     >
-      {/* <BottomNavigationAction label="Undo" value="undo" icon={<UndoIcon />} /> */}
-      <BottomNavigationAction
-        label="Save"
-        value="save"
-        icon={<SaveAltIcon />}
-        onMouseUp={exportImage}
-      />
-      {/* <BottomNavigationAction label="Redo" value="redo" icon={<RedoIcon />} /> */}
-    </BottomNavigation>
+      <SaveIcon />
+    </Fab>
   );
 }
