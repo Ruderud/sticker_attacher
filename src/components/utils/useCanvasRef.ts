@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
 export const useCanvasRef = (
-  canvasWidth: number,
-  canvasHeight: number,
+  canvasWidth: number = 100,
+  canvasHeight: number = 300,
   animate?: (canvasCtx: CanvasRenderingContext2D) => void
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,7 +31,6 @@ export const useCanvasRef = (
         reqId = window.requestAnimationFrame(reqAnimation);
 
         if (canvasCtx && animate) {
-          console.log(123);
           animate(canvasCtx);
         }
       };

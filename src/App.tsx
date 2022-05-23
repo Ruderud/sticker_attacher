@@ -31,10 +31,6 @@ export default function App() {
     pointer: 0,
   });
   const [rawImageRatio, setRawImageRatio] = useState<number>(1);
-
-  useEffect(() => {
-    console.log("원본대비 화면비율", rawImageRatio);
-  }, [rawImageRatio]);
   return (
     <AppComponent>
       <TopBar setImage={setImage} />

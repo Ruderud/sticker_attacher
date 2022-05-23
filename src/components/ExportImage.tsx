@@ -4,7 +4,6 @@ import { Fab } from "@mui/material";
 import { ImageType, StickerLog } from "../App";
 
 import imageLoad from "./utils/imageLoad";
-import { UsingJoinColumnIsNotAllowedError } from "typeorm";
 
 interface ExportImageProps {
   image?: ImageType;
@@ -37,8 +36,6 @@ export default function ExportImage({
     await Promise.all(
       stickerLog.logArray.map(async (sticker) => {
         const rawSticker = await imageLoad(sticker.stickerURL);
-        //여기서 스티커 x,y좌표랑 크기 원본대비로 재보정해야함
-        console.log(canvas.width, canvas.height, rawImageRatio);
         canvasCtx.drawImage(
           rawSticker,
           sticker.x / rawImageRatio,
@@ -80,6 +77,7 @@ const resultImageDownload = (
   return new Promise((resolve, reject) => {
     try {
       const resultImage = layer.toDataURL();
+      alert(resultImage);
       target.setAttribute("download", "newImage.png");
       target.setAttribute("href", resultImage);
       return resolve(target);

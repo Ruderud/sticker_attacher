@@ -90,8 +90,8 @@ export default function ImageCanvas({
 
     const rawStickerImg = new Image();
     rawStickerImg.src = selectedSticker?.url;
-    rawStickerImg.width = INITAL_CONTROLED_STICKER.width;
-    rawStickerImg.height = INITAL_CONTROLED_STICKER.height;
+    // rawStickerImg.width = INITAL_CONTROLED_STICKER.width;
+    // rawStickerImg.height = INITAL_CONTROLED_STICKER.height;
     rawStickerImg.onload = () => {
       setStickerImageElement(rawStickerImg);
     };
