@@ -31,6 +31,14 @@ export default function App() {
     pointer: 0,
   });
   const [rawImageRatio, setRawImageRatio] = useState<number>(1);
+
+  useEffect(() => {
+    setStickerLog({
+      logArray: [],
+      pointer: 0,
+    });
+    setSelectedSticker(undefined);
+  }, [image]);
   return (
     <AppComponent>
       <TopBar setImage={setImage} />
