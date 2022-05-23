@@ -19,6 +19,7 @@ export default function ExportImage({
   const exportImageLayer = useRef<HTMLCanvasElement>(
     document.createElement("canvas")
   );
+  const resultImgRef = useRef<HTMLImageElement>(document.createElement("img"));
 
   const linkElement = useRef<HTMLAnchorElement>(document.createElement("a"));
   const exportImage = async () => {
@@ -48,7 +49,8 @@ export default function ExportImage({
 
     await resultImageDownload(
       exportImageLayer.current,
-      linkElement.current
+      linkElement.current,
+      resultImgRef.current
     ).then((target) => target.click());
   };
 
@@ -64,7 +66,7 @@ export default function ExportImage({
         }}
         onClick={exportImage}
       >
-        {/* <a ref={linkElement} style={{ display: "none" }}></a> */}
+        <img ref={resultImgRef} style={{ display: "none" }} />
         <SaveIcon />
       </Fab>
     </div>
@@ -73,14 +75,18 @@ export default function ExportImage({
 
 const resultImageDownload = (
   layer: HTMLCanvasElement,
-  target: HTMLAnchorElement
+  target: HTMLAnchorElement,
+  resultImg: HTMLImageElement
 ): Promise<HTMLAnchorElement> => {
   return new Promise(async (resolve, reject) => {
     try {
-      const resultImage = layer.toDataURL("image/png", 1.0);
-      // alert(resultImage);
+      const resultImage = await imageLoad(layer.toDataURL("image/png", 1.0));
+      resultImg.src = resultImage.src;
+      resultImg.alt = "result";
+      console.log(resultImage);
       target.download = "newImage.png";
-      target.href = resultImage;
+      target.href = resultImage.src;
+      target.title = "result";
       // target.setAttribute("download", "newImage.png");
       // target.setAttribute("href", resultImage);
       return resolve(target);
