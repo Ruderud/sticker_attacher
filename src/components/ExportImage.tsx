@@ -64,6 +64,7 @@ export default function ExportImage({
         }}
         onClick={exportImage}
       >
+        {/* <a ref={linkElement} style={{ display: "none" }}></a> */}
         <SaveIcon />
       </Fab>
     </div>
@@ -77,9 +78,11 @@ const resultImageDownload = (
   return new Promise((resolve, reject) => {
     try {
       const resultImage = layer.toDataURL();
-      alert(resultImage);
-      target.setAttribute("download", "newImage.png");
-      target.setAttribute("href", resultImage);
+      // alert(resultImage);
+      target.download = "newImage.png";
+      target.href = resultImage;
+      // target.setAttribute("download", "newImage.png");
+      // target.setAttribute("href", resultImage);
       return resolve(target);
     } catch (error) {
       return reject(error);
