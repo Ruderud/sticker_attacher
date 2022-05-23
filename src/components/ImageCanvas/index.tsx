@@ -269,7 +269,7 @@ export default function ImageCanvas({
         style={{
           height: canvasSize.height,
           overflow: "hidden",
-          touchAction: isMove ? "none" : "auto",
+          touchAction: selectedSticker ? "none" : "auto",
         }}
       >
         <RawImageLayerCompoent ref={rawImageLayer} />
