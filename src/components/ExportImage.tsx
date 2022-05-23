@@ -78,7 +78,7 @@ const resultImageDownload = (
   target: HTMLAnchorElement
   // resultImg: HTMLImageElement
 ): Promise<HTMLAnchorElement> => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const resultImage = layer.toDataURL("image/png", 1.0);
       // console.log(resultImage);
