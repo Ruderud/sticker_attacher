@@ -4,6 +4,7 @@ import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import { styled } from "@mui/system";
 
 import { StickerState } from "./index";
+import { Sticker } from "../StickerList";
 
 const CONTROL_TAB_HEIGHT = 50;
 
@@ -11,12 +12,14 @@ interface ControlTabProps {
   fixSticker: () => void;
   sticker: StickerState;
   setSticker: React.Dispatch<React.SetStateAction<StickerState>>;
+  setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
 }
 
 export const ControlTab = ({
   fixSticker,
   sticker,
   setSticker,
+  setSelectedSticker,
 }: ControlTabProps) => {
   return (
     <ControlTabComponent>
@@ -58,7 +61,7 @@ export const ControlTab = ({
         variant="contained"
         color="error"
         onClick={() => {
-          // setSelectedSticker(undefined);
+          setSelectedSticker(undefined);
         }}
       >
         취소

@@ -263,12 +263,13 @@ export default function ImageCanvas({
         fixSticker={fixSticker}
         sticker={sticker}
         setSticker={setSticker}
+        setSelectedSticker={setSelectedSticker}
       />
       <CanvasContainerCompoent
         style={{
           height: canvasSize.height,
           overflow: "hidden",
-          touchAction: selectedSticker ? "none" : "auto",
+          touchAction: isMove ? "none" : "auto",
         }}
       >
         <RawImageLayerCompoent ref={rawImageLayer} />
