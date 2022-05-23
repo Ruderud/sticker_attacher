@@ -78,8 +78,6 @@ const resultImageDownload = (
     try {
       const resultImage = layer.toDataURL("image/png", 1.0);
       console.log(resultImage);
-
-      target.target = "_blank";
       target.href = resultImage;
       const imageWin = await imageLoad(resultImage);
       window.open("", "", `width=${imageWin.width}, height=${imageWin.height}`);
