@@ -38,7 +38,7 @@ export default function ExportImage() {
         label="Save"
         value="save"
         icon={<SaveAltIcon />}
-        onClick={exportImage}
+        onMouseUp={exportImage}
       />
       {/* <BottomNavigationAction label="Redo" value="redo" icon={<RedoIcon />} /> */}
     </BottomNavigation>
