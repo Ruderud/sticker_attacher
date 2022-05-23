@@ -7,7 +7,7 @@ import { ImageType } from "../App";
 import AddIcon from "@mui/icons-material/Add";
 
 import KOHARU_18 from "../asset/koharu_18.webp";
-import KOHARU_NO_HENTAI from "../asset/koharu_hentai_dame.jpg";
+import KOHARU_NO_HENTAI from "../asset/koharu_hentai_dame.png";
 import { useEffect, useRef, useState } from "react";
 
 export interface Sticker {
