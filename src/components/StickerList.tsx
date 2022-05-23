@@ -71,10 +71,6 @@ export default function StickerList({
           throw new Error("translate imageURL fail");
         }
         const imageURL = fileReader.result?.toString();
-        console.log({
-          file: inputImageFile,
-          url: imageURL,
-        });
         setStickerList([
           { name: inputImageFile.name, url: imageURL },
           ...stickerList,
@@ -107,7 +103,6 @@ export default function StickerList({
       >
         <ImageListItem
           onClick={() => {
-            console.log("스티커 이미지 가져오기");
             inputRef.current.click();
           }}
           sx={{

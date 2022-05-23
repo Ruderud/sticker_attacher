@@ -42,6 +42,7 @@ interface ImageCanvasProps {
   setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
   stickerLog: StickerLog;
   setStickerLog: React.Dispatch<React.SetStateAction<StickerLog>>;
+  setRawImageRatio: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function ImageCanvas({
@@ -50,6 +51,7 @@ export default function ImageCanvas({
   setSelectedSticker,
   stickerLog,
   setStickerLog,
+  setRawImageRatio,
 }: ImageCanvasProps) {
   const [canvasSize, setCanvasSize] = useState({
     width: DEFAULT_LAYER_SIZE.WIDTH,
@@ -63,7 +65,6 @@ export default function ImageCanvas({
   const [rawImageElement, setRawImageElement] = useState<HTMLImageElement>();
   const [stickerImageElement, setStickerImageElement] =
     useState<HTMLImageElement>();
-  const [canvasRatio, setCanvasRatio] = useState<number>(0);
 
   const setImage = () => {
     if (image === undefined) return;
@@ -71,8 +72,9 @@ export default function ImageCanvas({
     const rawImg = new Image();
     rawImg.src = image?.url;
     rawImg.onload = () => {
-      setCanvasRatio(canvasSize.width / rawImg.width);
+      setRawImageRatio(canvasSize.width / rawImg.width);
       const resizeHeight = rawImg.height * (canvasSize.width / rawImg.width);
+
       setCanvasSize({
         ...canvasSize,
         height: resizeHeight,

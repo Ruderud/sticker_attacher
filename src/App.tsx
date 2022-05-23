@@ -1,6 +1,6 @@
 import { Box, Fab, Paper } from "@mui/material";
 import { styled } from "@mui/system";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ExportImage from "./components/ExportImage";
 import ImageCanvas, { StickerState } from "./components/ImageCanvas";
 import StickerList, { Sticker } from "./components/StickerList";
@@ -30,7 +30,11 @@ export default function App() {
     logArray: [],
     pointer: 0,
   });
+  const [rawImageRatio, setRawImageRatio] = useState<number>(1);
 
+  useEffect(() => {
+    console.log("원본대비 화면비율", rawImageRatio);
+  }, [rawImageRatio]);
   return (
     <AppComponent>
       <TopBar setImage={setImage} />
@@ -45,8 +49,13 @@ export default function App() {
         setSelectedSticker={setSelectedSticker}
         stickerLog={stickerLog}
         setStickerLog={setStickerLog}
+        setRawImageRatio={setRawImageRatio}
       />
-      <ExportImage image={image} stickerLog={stickerLog} />
+      <ExportImage
+        image={image}
+        stickerLog={stickerLog}
+        rawImageRatio={rawImageRatio}
+      />
     </AppComponent>
   );
 }
