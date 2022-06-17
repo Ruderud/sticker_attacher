@@ -1,14 +1,15 @@
+import { useEffect, useRef, useState } from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
 import { Paper } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { ImageType } from "../App";
 import AddIcon from "@mui/icons-material/Add";
 
-import KOHARU_18 from "../asset/koharu_18.webp";
-import KOHARU_NO_HENTAI from "../asset/koharu_hentai_dame.png";
-import { useEffect, useRef, useState } from "react";
+import { ImageType } from "../App";
+import KARYL from "../asset/karyl.png";
+import MOCOCO from "../asset/mococo.png";
+import TERIRI from "../asset/teriri.jpg";
 
 export interface Sticker {
   name: string;
@@ -17,12 +18,16 @@ export interface Sticker {
 
 const DEFAULT_STICKERS: Array<Sticker> = [
   {
-    name: "코하루 18",
-    url: KOHARU_18,
+    name: "캬루",
+    url: KARYL,
   },
   {
-    name: "코하루 야한건 안돼!",
-    url: KOHARU_NO_HENTAI,
+    name: "모코코",
+    url: MOCOCO,
+  },
+  {
+    name: "테리리",
+    url: TERIRI,
   },
 ];
 
