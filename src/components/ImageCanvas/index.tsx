@@ -1,15 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { Button, IconButton, Paper } from "@mui/material";
-import { ImageType, StickerLog } from "../../App";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import { styled } from "@mui/system";
-import { Sticker } from "../StickerList";
+import { useEffect, useState } from 'react';
+import { Paper } from '@mui/material';
+import { ImageType, StickerLog } from '../../App';
+import { styled } from '@mui/system';
+import { Sticker } from '../StickerList';
 
-import useCanvasRef from "../utils/useCanvasRef.js";
+import useCanvasRef from '../utils/useCanvasRef.js';
 
-import KOHARU_18 from "../asset/koharu_18.webp";
-import ControlTab from "./ControlTab";
+import ControlTab from './ControlTab';
+import ImageUpload from './ImageUpload';
 
 export enum DEFAULT_LAYER_SIZE {
   WIDTH = window.innerWidth,
@@ -43,6 +41,7 @@ interface ImageCanvasProps {
   stickerLog: StickerLog;
   setStickerLog: React.Dispatch<React.SetStateAction<StickerLog>>;
   setRawImageRatio: React.Dispatch<React.SetStateAction<number>>;
+  onImageUpload: (file: File) => void;
 }
 
 export default function ImageCanvas({
@@ -52,6 +51,7 @@ export default function ImageCanvas({
   stickerLog,
   setStickerLog,
   setRawImageRatio,
+  onImageUpload,
 }: ImageCanvasProps) {
   const [canvasSize, setCanvasSize] = useState({
     width: DEFAULT_LAYER_SIZE.WIDTH,
@@ -63,8 +63,7 @@ export default function ImageCanvas({
   const [isMove, setIsMove] = useState<boolean>(false);
 
   const [rawImageElement, setRawImageElement] = useState<HTMLImageElement>();
-  const [stickerImageElement, setStickerImageElement] =
-    useState<HTMLImageElement>();
+  const [stickerImageElement, setStickerImageElement] = useState<HTMLImageElement>();
 
   const setImage = () => {
     if (image === undefined) return;
@@ -72,6 +71,7 @@ export default function ImageCanvas({
     const rawImg = new Image();
     rawImg.src = image?.url;
     rawImg.onload = () => {
+      console.log(rawImg.width, rawImg.height);
       setRawImageRatio(canvasSize.width / rawImg.width);
       const resizeHeight = rawImg.height * (canvasSize.width / rawImg.width);
 
@@ -101,7 +101,7 @@ export default function ImageCanvas({
     if (rawImageElement === undefined) return;
     const canvas = rawImageLayer.current;
     if (!canvas) return;
-    const canvasCtx = canvas.getContext("2d");
+    const canvasCtx = canvas.getContext('2d');
     if (!canvasCtx) return;
     canvas.width = canvas.width; //초기화
 
@@ -122,7 +122,7 @@ export default function ImageCanvas({
 
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
-    const canvasCtx = canvas.getContext("2d");
+    const canvasCtx = canvas.getContext('2d');
     if (!canvasCtx) return;
 
     if (x && y) {
@@ -133,24 +133,17 @@ export default function ImageCanvas({
       });
     }
 
-    canvasCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
     canvasCtx.clearRect(sticker.x, sticker.y, sticker.width, sticker.height);
-    canvasCtx.drawImage(
-      stickerImageElement,
-      sticker.x,
-      sticker.y,
-      sticker.width,
-      sticker.height
-    );
+    canvasCtx.drawImage(stickerImageElement, sticker.x, sticker.y, sticker.width, sticker.height);
   };
 
   const checkMouseOnSticker = (clientX: number, clientY: number): boolean => {
     const canvas = stickerLayer.current;
     if (!canvas) return false;
     const canvasPosition =
-      canvas.getBoundingClientRect() ??
-      new DOMRect(sticker.x, sticker.y, sticker.width, sticker.height);
+      canvas.getBoundingClientRect() ?? new DOMRect(sticker.x, sticker.y, sticker.width, sticker.height);
 
     if (
       sticker.x + canvasPosition.x - 10 <= clientX &&
@@ -169,21 +162,15 @@ export default function ImageCanvas({
     return false;
   };
 
-  const handleStickerMouseDown = (
-    evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>
-  ) => {
+  const handleStickerMouseDown = (evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     setIsMove(checkMouseOnSticker(evt.clientX, evt.clientY));
   };
 
   const handleStickerTouchDown = (evt: React.TouchEvent<HTMLCanvasElement>) => {
-    setIsMove(
-      checkMouseOnSticker(evt.touches[0].clientX, evt.touches[0].clientY)
-    );
+    setIsMove(checkMouseOnSticker(evt.touches[0].clientX, evt.touches[0].clientY));
   };
 
-  const handleStickerMouseMove = (
-    evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>
-  ) => {
+  const handleStickerMouseMove = (evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     if (!isMove) return;
     const [x, y] = setCoordinates(rawImageLayer, [evt.clientX, evt.clientY]);
     drawStickerLayer(x, y);
@@ -191,10 +178,7 @@ export default function ImageCanvas({
   const handleStickerTouchMove = (evt: React.TouchEvent<HTMLCanvasElement>) => {
     if (!isMove) return;
 
-    const [x, y] = setCoordinates(rawImageLayer, [
-      evt.touches[0].clientX,
-      evt.touches[0].clientY,
-    ]);
+    const [x, y] = setCoordinates(rawImageLayer, [evt.touches[0].clientX, evt.touches[0].clientY]);
 
     drawStickerLayer(x, y);
   };
@@ -207,11 +191,11 @@ export default function ImageCanvas({
     if (!selectedSticker || !stickerImageElement) return;
     const rawImageCanvas = rawImageLayer.current;
     if (!rawImageCanvas) return;
-    const rawImageCanvasCtx = rawImageCanvas.getContext("2d");
+    const rawImageCanvasCtx = rawImageCanvas.getContext('2d');
     if (!rawImageCanvasCtx) return;
     const stickerCanvas = stickerLayer.current;
     if (!stickerCanvas) return;
-    const stickerCanvasCtx = stickerCanvas.getContext("2d");
+    const stickerCanvasCtx = stickerCanvas.getContext('2d');
     if (!stickerCanvasCtx) return;
 
     rawImageCanvasCtx.drawImage(
@@ -270,51 +254,52 @@ export default function ImageCanvas({
       <CanvasContainerCompoent
         style={{
           height: canvasSize.height,
-          overflow: "hidden",
-          touchAction: selectedSticker ? "none" : "auto",
+          overflow: 'hidden',
+          touchAction: selectedSticker ? 'none' : 'auto',
+          position: 'relative',
         }}
       >
-        <RawImageLayerCompoent ref={rawImageLayer} />
-        <StickerLayerCompoent
-          ref={stickerLayer}
-          onMouseDown={handleStickerMouseDown}
-          onMouseMove={handleStickerMouseMove}
-          onMouseUp={handleStickerUp}
-          onTouchStart={handleStickerTouchDown}
-          onTouchMove={handleStickerTouchMove}
-          onTouchEnd={handleStickerUp}
-        />
+        {image === undefined ? (
+          <ImageUpload onImageUpload={onImageUpload} />
+        ) : (
+          <>
+            <RawImageLayerCompoent ref={rawImageLayer} />
+            <StickerLayerCompoent
+              ref={stickerLayer}
+              onMouseDown={handleStickerMouseDown}
+              onMouseMove={handleStickerMouseMove}
+              onMouseUp={handleStickerUp}
+              onTouchStart={handleStickerTouchDown}
+              onTouchMove={handleStickerTouchMove}
+              onTouchEnd={handleStickerUp}
+            />
+          </>
+        )}
       </CanvasContainerCompoent>
     </Paper>
   );
 }
 
-const setCoordinates = (
-  canvasRef: React.RefObject<HTMLCanvasElement>,
-  [x, y]: number[]
-): number[] => {
-  const canvasPosition =
-    canvasRef.current?.getBoundingClientRect() ?? new DOMRect(0, 0, 0, 0);
+const setCoordinates = (canvasRef: React.RefObject<HTMLCanvasElement>, [x, y]: number[]): number[] => {
+  const canvasPosition = canvasRef.current?.getBoundingClientRect() ?? new DOMRect(0, 0, 0, 0);
   const coordination = [(x - canvasPosition.x) * 1, (y - canvasPosition.y) * 1];
   return coordination;
 };
 
-const CanvasContainerCompoent = styled("div")({
-  position: "relative",
-  touchAction: "auto",
+const CanvasContainerCompoent = styled('div')({
+  position: 'relative',
+  touchAction: 'auto',
   paddingBottom: 80,
 });
 
-const RawImageLayerCompoent = styled("canvas")({
-  //   display: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(0%, 0%)",
+const RawImageLayerCompoent = styled('canvas')({
+  position: 'absolute',
+  left: 0,
+  top: 0,
 });
 
-const StickerLayerCompoent = styled("canvas")({
-  //   display: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(0%, -100.6%)",
+const StickerLayerCompoent = styled('canvas')({
+  position: 'absolute',
+  left: 0,
+  top: 0,
 });
