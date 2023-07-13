@@ -8,6 +8,7 @@ import useCanvasRef from '../utils/useCanvasRef.js';
 
 import ControlTab from './ControlTab';
 import ImageUpload from './ImageUpload';
+import { drawStickerButtons } from '../utils/drawStickerButtons';
 
 export enum DEFAULT_LAYER_SIZE {
   WIDTH = window.innerWidth,
@@ -15,6 +16,12 @@ export enum DEFAULT_LAYER_SIZE {
 }
 
 const CONTROL_TAB_HEIGHT = 50;
+export const STICKER_BUTTON_SPEC = {
+  radius: 15,
+  margin: 5,
+  pasteWidth: 70,
+  pasteHeight: 30,
+};
 
 export interface StickerState {
   x: number;
@@ -71,7 +78,6 @@ export default function ImageCanvas({
     const rawImg = new Image();
     rawImg.src = image?.url;
     rawImg.onload = () => {
-      console.log(rawImg.width, rawImg.height);
       setRawImageRatio(canvasSize.width / rawImg.width);
       const resizeHeight = rawImg.height * (canvasSize.width / rawImg.width);
 
@@ -90,8 +96,12 @@ export default function ImageCanvas({
 
     const rawStickerImg = new Image();
     rawStickerImg.src = selectedSticker?.url;
-    // rawStickerImg.width = INITAL_CONTROLED_STICKER.width;
-    // rawStickerImg.height = INITAL_CONTROLED_STICKER.height;
+    const stickerRatio = rawStickerImg.width / rawStickerImg.height;
+    setSticker({
+      ...INITAL_CONTROLED_STICKER,
+      width: window.innerWidth * 0.2,
+      height: (window.innerWidth * 0.2) / stickerRatio,
+    });
     rawStickerImg.onload = () => {
       setStickerImageElement(rawStickerImg);
     };
@@ -137,6 +147,8 @@ export default function ImageCanvas({
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
     canvasCtx.clearRect(sticker.x, sticker.y, sticker.width, sticker.height);
     canvasCtx.drawImage(stickerImageElement, sticker.x, sticker.y, sticker.width, sticker.height);
+
+    drawStickerButtons(canvasCtx, sticker);
   };
 
   const checkMouseOnSticker = (clientX: number, clientY: number): boolean => {
@@ -237,20 +249,88 @@ export default function ImageCanvas({
   useEffect(setStickerImage, [selectedSticker]);
   useEffect(drawStickerLayer, [stickerImageElement, sticker]);
 
+  const handleStickerHandleButton = (evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const [x, y] = setCoordinates(rawImageLayer, [evt.clientX, evt.clientY]);
+
+    const plusButtonArea = {
+      x: sticker.x,
+      y: sticker.y + sticker.height,
+      width: STICKER_BUTTON_SPEC.radius * 2 + STICKER_BUTTON_SPEC.margin * 2,
+      height: STICKER_BUTTON_SPEC.radius * 2 + STICKER_BUTTON_SPEC.margin * 2,
+    };
+    const minusButtonArea = {
+      x: sticker.x + STICKER_BUTTON_SPEC.radius * 2 + STICKER_BUTTON_SPEC.margin * 2,
+      y: sticker.y + sticker.height,
+      width: STICKER_BUTTON_SPEC.radius * 2 + STICKER_BUTTON_SPEC.margin * 2,
+      height: STICKER_BUTTON_SPEC.radius * 2 + STICKER_BUTTON_SPEC.margin * 2,
+    };
+    const pasteButtonArea = {
+      x: sticker.x + STICKER_BUTTON_SPEC.radius * 4 + STICKER_BUTTON_SPEC.margin * 4,
+      y: sticker.y + sticker.height,
+      width: STICKER_BUTTON_SPEC.pasteWidth + STICKER_BUTTON_SPEC.margin * 2,
+      height: STICKER_BUTTON_SPEC.pasteHeight + STICKER_BUTTON_SPEC.margin * 2,
+    };
+    const deleteButtonArea = {
+      x: sticker.x + sticker.width - STICKER_BUTTON_SPEC.radius / 2 - STICKER_BUTTON_SPEC.margin / 2,
+      y: sticker.y + -STICKER_BUTTON_SPEC.radius / 2 - STICKER_BUTTON_SPEC.margin / 2,
+      width: STICKER_BUTTON_SPEC.radius + STICKER_BUTTON_SPEC.margin,
+      height: STICKER_BUTTON_SPEC.radius + STICKER_BUTTON_SPEC.margin,
+    };
+
+    if (
+      x >= plusButtonArea.x &&
+      x <= plusButtonArea.x + plusButtonArea.width &&
+      y >= plusButtonArea.y &&
+      y <= plusButtonArea.y + plusButtonArea.height
+    ) {
+      setSticker((cur) => ({
+        ...sticker,
+        width: cur.width * 1.1,
+        height: cur.height * 1.1,
+      }));
+    } else if (
+      x >= minusButtonArea.x &&
+      x <= minusButtonArea.x + minusButtonArea.width &&
+      y >= minusButtonArea.y &&
+      y <= minusButtonArea.y + minusButtonArea.height
+    ) {
+      setSticker((cur) => ({
+        ...sticker,
+        width: cur.width * 0.9,
+        height: cur.height * 0.9,
+      }));
+    } else if (
+      x >= pasteButtonArea.x &&
+      x <= pasteButtonArea.x + pasteButtonArea.width &&
+      y >= pasteButtonArea.y &&
+      y <= pasteButtonArea.y + pasteButtonArea.height
+    ) {
+      fixSticker();
+    } else if (
+      x >= deleteButtonArea.x &&
+      x <= deleteButtonArea.x + deleteButtonArea.width &&
+      y >= deleteButtonArea.y &&
+      y <= deleteButtonArea.y + deleteButtonArea.height
+    ) {
+      console.log('delete');
+      setSelectedSticker(undefined);
+    }
+  };
+
   return (
     <Paper
       elevation={10}
       sx={{
         width: canvasSize.width,
-        height: canvasSize.height + CONTROL_TAB_HEIGHT,
+        height: canvasSize.height,
       }}
     >
-      <ControlTab
+      {/* <ControlTab
         fixSticker={fixSticker}
         sticker={sticker}
         setSticker={setSticker}
         setSelectedSticker={setSelectedSticker}
-      />
+      /> */}
       <CanvasContainerCompoent
         style={{
           height: canvasSize.height,
@@ -266,6 +346,7 @@ export default function ImageCanvas({
             <RawImageLayerCompoent ref={rawImageLayer} />
             <StickerLayerCompoent
               ref={stickerLayer}
+              onClick={handleStickerHandleButton}
               onMouseDown={handleStickerMouseDown}
               onMouseMove={handleStickerMouseMove}
               onMouseUp={handleStickerUp}

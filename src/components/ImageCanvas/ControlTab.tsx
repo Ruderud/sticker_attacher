@@ -1,10 +1,10 @@
-import { Button, IconButton, Paper } from "@mui/material";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import { styled } from "@mui/system";
+import { Button, IconButton, Paper } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import { styled } from '@mui/system';
 
-import { StickerState } from "./index";
-import { Sticker } from "../StickerList";
+import { StickerState } from './index';
+import { Sticker } from '../StickerList';
 
 const CONTROL_TAB_HEIGHT = 50;
 
@@ -15,12 +15,7 @@ interface ControlTabProps {
   setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
 }
 
-export const ControlTab = ({
-  fixSticker,
-  sticker,
-  setSticker,
-  setSelectedSticker,
-}: ControlTabProps) => {
+export const ControlTab = ({ fixSticker, sticker, setSticker, setSelectedSticker }: ControlTabProps) => {
   return (
     <ControlTabComponent>
       <IconButton
@@ -59,7 +54,7 @@ export const ControlTab = ({
       </Button>
       <Button
         variant="contained"
-        color="error"
+        color="warning"
         onClick={() => {
           setSelectedSticker(undefined);
         }}
@@ -100,9 +95,9 @@ export const ControlTab = ({
 
 export default ControlTab;
 
-const ControlTabComponent = styled("div")({
-  borderBottom: "1px solid black",
+const ControlTabComponent = styled('div')({
+  borderBottom: '1px solid black',
   height: CONTROL_TAB_HEIGHT,
-  display: "flex",
-  alignItems: "center",
+  display: 'flex',
+  alignItems: 'center',
 });
