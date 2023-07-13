@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import ImageList from "@mui/material/ImageList";
-import ImageListItem from "@mui/material/ImageListItem";
-import ImageListItemBar from "@mui/material/ImageListItemBar";
-import { Paper } from "@mui/material";
-import Typography from "@mui/material/Typography";
-import AddIcon from "@mui/icons-material/Add";
+import { useEffect, useRef, useState } from 'react';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
+import ImageListItemBar from '@mui/material/ImageListItemBar';
+import { Paper } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import AddIcon from '@mui/icons-material/Add';
 
-import { ImageType } from "../App";
-import KARYL from "../asset/karyl.png";
-import MOCOCO from "../asset/mococo.png";
-import TERIRI from "../asset/teriri.jpg";
+import { ImageType } from '../App';
+import KARYL from '../asset/karyl.png';
+import MOCOCO from '../asset/mococo.png';
+import TERIRI from '../asset/teriri.jpg';
+import KEQING from '../asset/keqing.png';
 
 export interface Sticker {
   name: string;
@@ -18,15 +19,19 @@ export interface Sticker {
 
 const DEFAULT_STICKERS: Array<Sticker> = [
   {
-    name: "캬루",
+    name: '각청',
+    url: KEQING,
+  },
+  {
+    name: '캬루',
     url: KARYL,
   },
   {
-    name: "모코코",
+    name: '모코코',
     url: MOCOCO,
   },
   {
-    name: "테리리",
+    name: '테리리',
     url: TERIRI,
   },
 ];
@@ -37,14 +42,10 @@ interface StickerListProps {
   setSelectedSticker: React.Dispatch<React.SetStateAction<Sticker | undefined>>;
 }
 
-export default function StickerList({
-  image,
-  selectedSticker,
-  setSelectedSticker,
-}: StickerListProps) {
+export default function StickerList({ image, selectedSticker, setSelectedSticker }: StickerListProps) {
   const selectSticker = (sticker: Sticker) => {
     if (!image) {
-      alert("이미지를 먼저 가져와주세요");
+      alert('이미지를 먼저 가져와주세요');
       return;
     }
 
@@ -52,11 +53,11 @@ export default function StickerList({
   };
 
   const [stickerList, setStickerList] = useState<Sticker[]>(DEFAULT_STICKERS);
-  const inputRef = useRef<HTMLInputElement>(document.createElement("input"));
+  const inputRef = useRef<HTMLInputElement>(document.createElement('input'));
 
   useEffect(() => {
-    inputRef.current.accept = "image/*";
-    inputRef.current.type = "file";
+    inputRef.current.accept = 'image/*';
+    inputRef.current.type = 'file';
   }, []);
 
   const handleImageUpload = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,13 +74,10 @@ export default function StickerList({
       };
       fileReader.onload = () => {
         if (fileReader.result === null || fileReader.result === undefined) {
-          throw new Error("translate imageURL fail");
+          throw new Error('translate imageURL fail');
         }
         const imageURL = fileReader.result?.toString();
-        setStickerList([
-          { name: inputImageFile.name, url: imageURL },
-          ...stickerList,
-        ]);
+        setStickerList([{ name: inputImageFile.name, url: imageURL }, ...stickerList]);
       };
     } catch (err) {
       console.log(`Error message: ${err}`);
@@ -93,15 +91,15 @@ export default function StickerList({
         mt: 2,
       }}
     >
-      <Typography variant="h5" sx={{ pl: 2, fontWeight: "bold" }}>
+      <Typography variant="h5" sx={{ pl: 2, fontWeight: 'bold' }}>
         사용할 스티커 선택
       </Typography>
       <ImageList
         sx={{
-          width: "100%",
+          width: '100%',
           height: 150,
-          display: "flex",
-          flexDirection: "row",
+          display: 'flex',
+          flexDirection: 'row',
 
           marginTop: 0,
         }}
@@ -112,23 +110,19 @@ export default function StickerList({
           }}
           sx={{
             minWidth: 180,
-            background: "rgba(0,0,0,0.3)",
-            alignItems: "center",
-            justifyContent: "center",
+            background: 'rgba(0,0,0,0.3)',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <input
-            ref={inputRef}
-            style={{ display: "none" }}
-            onChange={handleImageUpload}
-          />
+          <input ref={inputRef} style={{ display: 'none' }} onChange={handleImageUpload} />
           <AddIcon
             sx={{
               fontSize: 50,
-              color: "rgb(255,255,255)",
+              color: 'rgb(255,255,255)',
             }}
           />
-          <ImageListItemBar title={"내 스티커 가져오기"} position="bottom" />
+          <ImageListItemBar title={'내 스티커 가져오기'} position="bottom" />
         </ImageListItem>
         {stickerList.map((sticker, idx) => (
           <ImageListItem
@@ -138,12 +132,7 @@ export default function StickerList({
               selectSticker(sticker);
             }}
           >
-            <img
-              src={`${sticker.url}`}
-              style={{ width: 180, overflow: "hidden" }}
-              alt={sticker.name}
-              loading="lazy"
-            />
+            <img src={`${sticker.url}`} style={{ width: 180, overflow: 'hidden' }} alt={sticker.name} loading="lazy" />
             <ImageListItemBar title={sticker.name} position="bottom" />
           </ImageListItem>
         ))}
